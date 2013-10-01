@@ -103,7 +103,7 @@
         简单的来讲,进程就是一次程序(指的是源代码通过编译,汇编,连接等变成的可执行文件)的执行.它是一个动态的过程,而程序却是一个静态的概念.&nbsp;比如:一个聊天软件QQ放在桌面你没有去点击时,这时就是一个存放在硬盘的程序,通过你的点击开始加载到内存开始执行到最终退出,这个中间过程就是程序的一次执行,就是所谓的进程.(还有文本编辑器,Web Browser等).居然进程是程序的一次执行,那么进程和程序有什么区别呢?<br/><br/>
 
         1.2进程和程序的区别?<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        
+    
         进程虽然来至于程序,但是它和程序有很大的不同.最主要的前者是动态的而后者却是静态的.进程不仅仅包含text section(程序代码区),还必须有指向运行时的程序计数器,还包含程序运行stack(存放一些函数参数,返回地址,局部变量等),还有数据区存放一些全局变量,还有Heap(堆区)存放程序运行过程中动态分配和创建的一些数据.如图:<br/>
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/images/thread/2013-10-01.png"><br/>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
@@ -112,30 +112,12 @@
 </h6>
 
 
-
-
-<h3>线程</h3>
-
-
-<h6>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;明白进程的概念以后,然后在看看什么是线程,线程是操作系统的基本调度单位,它包含线程ID,程序计数器,一组register, a stack.
-        一个进程包含一个或多个线程.同一基础的多个线程间共享进程的code section(代码区),data section和其他一些操作系统资源(IO等),
-        如果一个进程中含有多个线程,那么每次它可以完成多个任务.如图:<br/>
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/images/thread/2013-10-01-02.png"><br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-             图2:单线程和多线程进程<br/>
-             
-             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;多线程的出现大大提高了CPU的利用率,然后由于多线程的编程,出现多个线程访问同一资源,多个线程写同一数据,
-             这样就带来了共享资源的数据不一致和错误,所以我们必须通过一些机制来实现线程间的同步和通信.
-             <br/><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.
-            Critical Section 是同一时间最多只允许一个线程进入的代码块.
-            <br>
-            >>>待续
-</h6>
-
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/01/thread-synchronized-1/">Read on &rarr;</a>
+    </footer>
   
 
 
