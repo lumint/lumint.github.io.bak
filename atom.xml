@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Lumint's Blog]]></title>
+  <title><![CDATA[Lumint's Octopress Blog]]></title>
   <link href="http://lumint.github.io/atom.xml" rel="self"/>
   <link href="http://lumint.github.io/"/>
-  <updated>2013-10-01T15:22:52+08:00</updated>
+  <updated>2013-10-01T15:31:15+08:00</updated>
   <id>http://lumint.github.io/</id>
   <author>
     <name><![CDATA[Lumint]]></name>
