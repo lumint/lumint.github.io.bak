@@ -128,7 +128,7 @@
              <br/><br/>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.Critical Section 是同一时间最多只允许一个线程进入的代码块.
             <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于小编对Java比较熟,所以下面以Java为例),当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于笔者对Java比较熟,所以下面以Java为例),当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
             <br/>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Java采用Synchronized关键字和Lock对应的API实现(Java1.5↑)线程的同步问题.下面我们就使用synchronized和Lock来实现线程的同步问题.
 </p>
@@ -192,44 +192,74 @@
 <span class='line-number'>35</span>
 <span class='line-number'>36</span>
 <span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">ThreadSync1</span> <span class="n">implements</span> <span class="no">Runnable</span><span class="p">{</span>
-</span><span class='line'>      <span class="kp">private</span> <span class="no">Object</span> <span class="n">mutex</span><span class="p">;</span>
-</span><span class='line'>      
-</span><span class='line'>      <span class="kp">public</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="no">Object</span> <span class="n">mutex</span><span class="p">;</span>
 </span><span class='line'>  
-</span><span class='line'>      <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="no">Object</span> <span class="n">mutex1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
-</span><span class='line'>          <span class="no">Object</span> <span class="n">mutex2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
-</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程一&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程二&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程三&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex2</span><span class="p">),</span><span class="s2">&quot;线程四&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      
-</span><span class='line'>      <span class="kp">public</span> <span class="n">void</span> <span class="n">setMutex</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      
-</span><span class='line'>      <span class="vi">@Override</span>
-</span><span class='line'>      <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="n">synchronized</span> <span class="p">(</span><span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>              <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;进入Critical Section! 等待5秒!&quot;</span><span class="p">);</span>
-</span><span class='line'>              <span class="n">try</span> <span class="p">{</span>
-</span><span class='line'>                  <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
-</span><span class='line'>                      <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
-</span><span class='line'>                      <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>                  <span class="p">}</span>
-</span><span class='line'>              <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                  <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
-</span><span class='line'>              <span class="p">}</span>
-</span><span class='line'>              <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;退出Critical Section! 等待5秒!&quot;</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>          
-</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="kp">public</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="no">Object</span> <span class="n">mutex1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程一&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程二&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="no">Object</span> <span class="n">mutex2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程三&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex2</span><span class="p">),</span><span class="s2">&quot;线程四&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">setMutex</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="vi">@Override</span>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">synchronized</span> <span class="p">(</span><span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;进入Critical Section! 等待2秒!&quot;</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>              <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span><span class='line'>                  <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'>                  <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>          <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>              <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;退出Critical Section!&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<pre><code>运行结果:   
+    线程一进入Critical Section! 等待2秒!
+    线程四进入Critical Section! 等待2秒!
+    线程一1
+    线程四1
+    线程一2
+    线程一退出Critical Section!
+    线程三进入Critical Section! 等待2秒!
+    线程四2
+    线程四退出Critical Section!
+    线程三1
+    线程三2
+    线程三退出Critical Section!
+    线程二进入Critical Section! 等待2秒!
+    线程二1
+    线程二2
+    线程二退出Critical Section!
+</code></pre>
+
+<p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当程序运行开始由于线程一,线程二,线程三使用的同一个mutex,当线程一进入Critical Section,线程二和线程三将被阻塞在critical section外面,而线程四使使用的mutex2互斥量将不会阻塞,所以先是线程一和线程四进入Critical Section(因为线程一和线程四不是使用的同一mutex导致Critical Section能被多个线程进入). 当线程一运行完成,线程二和线程三将会同时竞争进入Critical Section,JVM根据一定的策略来调度其一进去(进程的不确定性).
+</p>
 
 </div>
 
