@@ -135,15 +135,101 @@
 
 
 <p>
-            当一个线程进入critical section时,那么JVM是根据什么来判断该线程是否能进入呢?当编写程序设定critical section时,我们会为该critical section指定一个mutex(互斥量),而互斥量的值将决定
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当一个线程进入critical section时,那么JVM是根据什么来判断该线程是否能进入呢?当编写程序设定critical section时,我们会为该critical section指定一个mutex(互斥量),而互斥量的值将决定
             其他线程是否可以进入该Critical Section.
-            &#8220;` Java
-            synchronized(mutex){
-                &#8230;
-            }
-            &#8220;` 
+            
 
 </p>
+
+
+<pre><code>        synchronized(mutex){
+            // critical section code
+            ...
+        }
+</code></pre>
+
+<p>     
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在Java使用上面语法可以设置Critical Section,对于互斥的代码可以写入Critical Section.如下面代码:<br/>
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>ThreadSync1.java</span><a href='http://weibo.com/u/2277842353'>Weibo</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">ThreadSync1</span> <span class="n">implements</span> <span class="no">Runnable</span><span class="p">{</span>
+</span><span class='line'>      <span class="kp">private</span> <span class="no">Object</span> <span class="n">mutex</span><span class="p">;</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="kp">public</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>      <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="no">Object</span> <span class="n">mutex1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
+</span><span class='line'>          <span class="no">Object</span> <span class="n">mutex2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Object</span><span class="p">();</span>
+</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程一&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程二&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex1</span><span class="p">),</span><span class="s2">&quot;线程三&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>          <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ThreadSync1</span><span class="p">(</span><span class="n">mutex2</span><span class="p">),</span><span class="s2">&quot;线程四&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="kp">public</span> <span class="n">void</span> <span class="n">setMutex</span><span class="p">(</span><span class="no">Object</span> <span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">mutex</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="vi">@Override</span>
+</span><span class='line'>      <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">synchronized</span> <span class="p">(</span><span class="n">mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>              <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;进入Critical Section! 等待5秒!&quot;</span><span class="p">);</span>
+</span><span class='line'>              <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span><span class='line'>                      <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</span><span class='line'>                      <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>                  <span class="p">}</span>
+</span><span class='line'>              <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>              <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="no">Thread</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;退出Critical Section! 等待5秒!&quot;</span><span class="p">);</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 </div>
 
