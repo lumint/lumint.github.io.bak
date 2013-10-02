@@ -4,7 +4,7 @@
   <title><![CDATA[Lumint's Octopress Blog]]></title>
   <link href="http://lumint.github.io/atom.xml" rel="self"/>
   <link href="http://lumint.github.io/"/>
-  <updated>2013-10-02T09:49:24+08:00</updated>
+  <updated>2013-10-02T17:27:09+08:00</updated>
   <id>http://lumint.github.io/</id>
   <author>
     <name><![CDATA[Lumint]]></name>
@@ -42,7 +42,7 @@
 <h3>线程</h3>
 
 
-<h6>
+<p>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;明白进程的概念以后,然后在看看什么是线程,线程是操作系统的基本调度单位,它包含线程ID,程序计数器,一组register, a stack.
         一个进程包含一个或多个线程.同一基础的多个线程间共享进程的code section(代码区),data section和其他一些操作系统资源(IO等),
         如果一个进程中含有多个线程,那么每次它可以完成多个任务.如图:<br/>
@@ -53,18 +53,24 @@
              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;多线程的出现大大提高了CPU的利用率,然后由于多线程的编程,出现多个线程访问同一资源,多个线程写同一数据,
              这样就带来了共享资源的数据不一致和错误,所以我们必须通过一些机制来实现线程间的同步和通信.
              <br/><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.
-            Critical Section 是同一时间最多只允许一个线程进入的代码块.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.Critical Section 是同一时间最多只允许一个线程进入的代码块.
             <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于小编对Java比较熟,所以下面以Java为例),
-            当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,
-            否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,
-            那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于小编对Java比较熟,所以下面以Java为例),当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
             <br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Java采用Synchronized关键字和Lock(Java1.5↑)对应的API实现线程的同步问题.
-</h6>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Java采用Synchronized关键字和Lock对应的API实现(Java1.5↑)线程的同步问题.下面我们就使用synchronized和Lock来实现线程的同步问题.
+</p>
 
 
+<p>
+            当一个线程进入critical section时,那么JVM是根据什么来判断该线程是否能进入呢?当编写程序设定critical section时,我们会为该critical section指定一个mutex(互斥量),而互斥量的值将决定
+            其他线程是否可以进入该Critical Section.
+            &#8220;` Java
+            synchronized(mutex){
+                &#8230;
+            }
+            &#8220;` 
+
+</p>
 
 ]]></content>
   </entry>

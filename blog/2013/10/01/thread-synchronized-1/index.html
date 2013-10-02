@@ -115,7 +115,7 @@
 <h3>线程</h3>
 
 
-<h6>
+<p>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;明白进程的概念以后,然后在看看什么是线程,线程是操作系统的基本调度单位,它包含线程ID,程序计数器,一组register, a stack.
         一个进程包含一个或多个线程.同一基础的多个线程间共享进程的code section(代码区),data section和其他一些操作系统资源(IO等),
         如果一个进程中含有多个线程,那么每次它可以完成多个任务.如图:<br/>
@@ -126,18 +126,24 @@
              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;多线程的出现大大提高了CPU的利用率,然后由于多线程的编程,出现多个线程访问同一资源,多个线程写同一数据,
              这样就带来了共享资源的数据不一致和错误,所以我们必须通过一些机制来实现线程间的同步和通信.
              <br/><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.
-            Critical Section 是同一时间最多只允许一个线程进入的代码块.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了同一时间只允许一个线程访问共享资源,提出了Critical Section(临界区)的概念.Critical Section 是同一时间最多只允许一个线程进入的代码块.
             <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于小编对Java比较熟,所以下面以Java为例),
-            当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,
-            否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,
-            那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在各种编程语言中几乎都提供了Critical Section的实现(由于小编对Java比较熟,所以下面以Java为例),当一个线程要访问Critical Section时,根据同步机制来检查是否有其它的线程进入Critical Section.如果没有则该线程进入Critical Section,否则,这个线程必须等到当前进入Critical Section的线程从Critical Section退出,才能进去.如果有多个线程在等待,那么JVM就调度其中一个线程(根据一定的策略[优先级,响应比等])进入Critical Section.
             <br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Java采用Synchronized关键字和Lock(Java1.5↑)对应的API实现线程的同步问题.
-</h6>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Java采用Synchronized关键字和Lock对应的API实现(Java1.5↑)线程的同步问题.下面我们就使用synchronized和Lock来实现线程的同步问题.
+</p>
 
 
+<p>
+            当一个线程进入critical section时,那么JVM是根据什么来判断该线程是否能进入呢?当编写程序设定critical section时,我们会为该critical section指定一个mutex(互斥量),而互斥量的值将决定
+            其他线程是否可以进入该Critical Section.
+            &#8220;` Java
+            synchronized(mutex){
+                &#8230;
+            }
+            &#8220;` 
+
+</p>
 
 </div>
 
@@ -177,14 +183,6 @@
   
     <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
   
-  
-	<div class="bshare-custom"><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
-
-<!-- UY BEGIN -->
-<div id="uyan_frame"></div>
-<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
-<!-- UY END -->
-	
 </div>
 
     
@@ -232,10 +230,11 @@
     <ul id="weibo">
     <li>
     <!-- 在此插入获得的微博秀代码 -->
-    	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=2277842353&verifier=03cd9a29&dpc=1"></iframe>
-		</li>
-		</ul>
+		<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=2277842353&verifier=03cd9a29&dpc=1"></iframe>
+      </li>
+    </ul>
 </section>
+
 
 
 
