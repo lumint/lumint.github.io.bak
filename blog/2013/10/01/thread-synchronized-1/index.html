@@ -258,7 +258,7 @@
 </code></pre>
 
 <p>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当程序运行开始由于线程一,线程二,线程三使用的同一个mutex,当线程一进入Critical Section,线程二和线程三将被阻塞在critical section外面,而线程四使使用的mutex2互斥量将不会阻塞,所以先是线程一和线程四进入Critical Section(因为线程一和线程四不是使用的同一mutex导致Critical Section能被多个线程进入). 当线程一运行完成,线程二和线程三将会同时竞争进入Critical Section,JVM根据一定的策略来调度其一进去(进程的不确定性).
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当程序运行开始由于线程一,线程二,线程三使用的同一个mutex,当线程一进入Critical Section,线程二和线程三将被阻塞在critical section外面,而线程四使使用的mutex2互斥量将不会阻塞,所以先是线程一和线程四进入Critical Section(因为线程一和线程四不是使用的同一mutex导致Critical Section能被多个线程进入). 当线程一运行完成,线程二和线程三将会同时竞争进入Critical Section,JVM根据一定的策略来调度其一进去(线程调度的不确定性).在这里理解mutex是非常重要的,因为只有学会如何设定mutex才能让线程互斥访问.接下来将对mutex的使用做出讨论.
 </p>
 
 </div>
