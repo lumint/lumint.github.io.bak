@@ -4,7 +4,7 @@
   <title><![CDATA[Lumint's Octopress Blog]]></title>
   <link href="http://lumint.github.io/atom.xml" rel="self"/>
   <link href="http://lumint.github.io/"/>
-  <updated>2013-10-02T21:58:44+08:00</updated>
+  <updated>2013-10-06T07:35:46+08:00</updated>
   <id>http://lumint.github.io/</id>
   <author>
     <name><![CDATA[Lumint]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[线程同步(二)]]></title>
+    <link href="http://lumint.github.io/blog/2013/10/02/thread-synchronized-2/"/>
+    <updated>2013-10-02T22:00:00+08:00</updated>
+    <id>http://lumint.github.io/blog/2013/10/02/thread-synchronized-2</id>
+    <content type="html"><![CDATA[<h3>互斥量:</h3>
+
+
+<p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在Java中互斥量必须为对象类型,不能是基本数据类型,在Java中互斥量应该被称为锁.在一个应用中什么时候使用锁呢? 该如何使用锁呢?<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;先看下面这个计数例子:
+
+<figure class='code'><figcaption><span>Counter.java</span><a href='http://weibo.com/u/2277842353'>Weibo</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">Counter</span> <span class="n">implements</span> <span class="no">Runnable</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">int</span> <span class="n">count</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">increment</span><span class="p">(){</span>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="nb">Integer</span><span class="o">.</span><span class="n">MAX_VALUE</span><span class="p">)</span>
+</span><span class='line'>          <span class="kp">throw</span> <span class="kp">new</span> <span class="no">IllegalStateException</span><span class="p">(</span><span class="s2">&quot;count overflow!&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="n">int</span> <span class="n">getCount</span><span class="p">(){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="vi">@Override</span>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">increment</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>          <span class="no">Counter</span> <span class="n">task</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Counter</span><span class="p">();</span>
+</span><span class='line'>          <span class="no">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+</span><span class='line'>          <span class="no">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">t1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">getCount</span><span class="p">());</span>
+</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>            
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面程序因为没有使用同步机制,所以运行结果一般会小于20000,这是因为在increment方法中count++并不是原子操作,count++分成 读&#8211;>修改&#8211;>写 三步组成,所以在多线程的访问下,该操作不是线程安全的.因此我们必须采用同步机制来使count++为原子操作.<br/>
+        
+</p>
+
+
+<pre><code>①让方法为原子操作: 在increment方法前加入synchronized.
+public synchronized void increment(){
+    count++;
+}
+</code></pre>
+
+<!--more-->
+
+
+<p></p>
+
+<pre><code>②使用synchronized包含将要同步的代码块: 可以让count++这段代码为原子操作.
+public void increment(){
+    synchronized(this){
+        count++;
+    }
+}
+</code></pre>
+
+<p>上面两种方法方法都能让线程同步访问,并且两者用的同步锁都是this对象.在<a href="http://lumint.github.io/blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a>中介绍过当多个线程mutex使用的是同一对象时,那么多个线程间就达到了互斥的效果.在实例方法上使用synchronized关键字,那么使用的锁的对象就是this.若increment方法为静态方法,在静态方法上面使用synchronized关键字,这样锁对象就是类似与类的字节码.所以下面两段代码为等效的同步(只是同步等效,方法并不等效,即对于该类的所有对象这两种方法对于多个线程同一时刻只能一个线程进入该同步块,而上面代码块是对于一个对象,多个线程同一时刻只能一个线程进入该同步块).</p>
+
+<pre><code>public synchronized static void increment(){
+    count++;
+}
+
+public void increment(){
+    synchronized(Counter.class){
+        count++;
+    }
+}
+</code></pre>
+
+<p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于使用不同的锁从而达到的互斥的效果也不相同,对于多个对象,多个线程间的互斥代码我们应该使用静态变量的锁,而对于一个对象,多个线程间的互斥应该使用实例锁.上面使用synchronized方法和synchronized代码块都使用的内置锁加锁机制.这种锁类型最重要的一个特点就是Reentrancy(可重入).什么是可重入呢?<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在了解可重入之前,想想当一个线程进入critical section JVM是通过什么机制让其他线程不能进入呢?其实是通过一个计数器和一个绑定的线程,当一个线程想进入critical section 时,先判断计数器是否等于0,若为0就让线程进入并绑定该线程计数器+1,这时,若其他线程要进入则会阻塞在外面.所以每一个锁都关联一个所有者的线程和一个计数器.
+</p>
+
+
+<figure class='code'><figcaption><span>DoubleLock.java</span><a href='http://weibo.com/u/2277842353'>Weibo</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">DoubleLock</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">synchronized</span> <span class="n">void</span> <span class="n">lock</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span><span class="p">){</span>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span><span class="k">return</span><span class="p">;</span>
+</span><span class='line'>      <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="s2">&quot;This is a lock !&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">lock</span><span class="p">(</span><span class="o">--</span><span class="n">i</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">DoubleLock</span><span class="p">()</span><span class="o">.</span><span class="n">lock</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当i=2时,首先获取锁对象进入方法内部这时该锁与该线程关联,并计数器值为1,当i=1时,这时在获取锁时,如果JVM判断是同一个锁对象并且是同一个线程那么线程就可再次进入的并计数器的值+1.当线程退出一个同步块计数器-1,当计数器为0时,该锁就自动释放了.上面体现了锁的可重入性.下面我们看看可重入的另外的一中情况.
+</p>
+
+
+
+
+<figure class='code'><figcaption><span>CheckReentrancy.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">CheckReentrancy</span> <span class="p">{</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="n">synchronized</span> <span class="n">void</span> <span class="n">doSomething</span><span class="p">(){</span>
+</span><span class='line'>      <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="s2">&quot;supper someting &quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="k">class</span> <span class="nc">CheckReentrancyChild</span> <span class="n">extends</span> <span class="no">CheckReentrancy</span><span class="p">{</span>
+</span><span class='line'>      <span class="kp">public</span> <span class="n">synchronized</span> <span class="n">void</span> <span class="n">doSomething</span><span class="p">(){</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="s2">&quot;child someting &quot;</span><span class="p">);</span>
+</span><span class='line'>          <span class="k">super</span><span class="o">.</span><span class="n">doSomething</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kp">new</span> <span class="no">CheckReentrancyChild</span><span class="p">()</span><span class="o">.</span><span class="n">doSomething</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面是一个比较特殊的可重入,当子类中调用父类的同步方法,那么锁还可以重入吗?答案是肯定的.当进入CheckReentrancyChild.doSomething()方法时获取CheckReentrancyChild内置对象的锁(this),当执行super.doSomething()时,其实这时父类的锁对象也是子类的对象this,所以对于这种情况就是一个线程对一个对象锁的两次进入.
+</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[线程同步(一)]]></title>
