@@ -4,7 +4,7 @@
   <title><![CDATA[Lumint's Octopress Blog]]></title>
   <link href="http://lumint.github.io/atom.xml" rel="self"/>
   <link href="http://lumint.github.io/"/>
-  <updated>2013-10-06T07:35:46+08:00</updated>
+  <updated>2013-10-11T17:18:43+08:00</updated>
   <id>http://lumint.github.io/</id>
   <author>
     <name><![CDATA[Lumint]]></name>
@@ -12,6 +12,324 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[线程同步(三)]]></title>
+    <link href="http://lumint.github.io/blog/2013/10/09/thread-synchronized-3/"/>
+    <updated>2013-10-09T18:10:00+08:00</updated>
+    <id>http://lumint.github.io/blog/2013/10/09/thread-synchronized-3</id>
+    <content type="html"><![CDATA[<h3>同步条件的使用:</h3>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上篇提到互斥量(锁)的使用(<a href="http://lumint.github.io/blog/2013/10/02/thread-synchronized-2/">线程同步(二)</a>),使用锁能使线程间同步访问数据,由于实际情况有诸多限制条件和因素,所以JVM也提供wait(),notify(),notifyAll()方法,可以在同步代码块中使用条件.因为任何对象都可以作为锁,所以这三种方法是在Object对象中的,任何类都继承了此方法.<br/></p>
+
+<pre><code>wait():一个线程调用wait方法JVM会让该线程睡眠并释放该对象锁,因此 wait方法必须在synchronized代码块中调用,否则
+      会抛出IllegalMonitorStateException.
+
+notify(),notifyAll():都是唤醒某个对象锁上面的线程,而notify是唤醒该对象锁的第一个等待线程,notifyAll是所有等
+      待线程.因此二者也必须在同步代码块中使用.   
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;生产者和消费者是在并发编程中一个经典的问题,一个缓冲区,多个生产者,多个消费者从而构成了并发中同步,共享数据等问题.</p>
+
+<pre><code>需求:多个生产者向缓冲区中存储数据,多个消费者向缓冲区中取数据,当缓冲区满了生产者不能存储数据,当缓冲区
+    为空消费者不能取数据.
+
+设计:该需求设计三个数据模型生产者,消费者,缓冲区.
+</code></pre>
+
+<figure class='code'><figcaption><span>TaskPool.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TaskPool</span><span class="p">{</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">int</span> <span class="n">maxsize</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="no">LinkedList</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span> <span class="n">linkedList</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">TaskPool</span><span class="p">(</span><span class="n">int</span> <span class="n">maxsize</span><span class="p">){</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">=</span> <span class="n">maxsize</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">linkedList</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">LinkedList</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">List</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span> <span class="n">getLinkedList</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="no">Collections</span><span class="o">.</span><span class="n">unmodifiableList</span><span class="p">(</span><span class="n">linkedList</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">put</span><span class="p">(</span><span class="nb">String</span> <span class="n">task</span><span class="p">){</span>
+</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">synchronized</span> <span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>              <span class="k">while</span><span class="p">(</span><span class="n">maxsize</span> <span class="o">==</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">size</span><span class="p">()){</span>
+</span><span class='line'>                  <span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>              <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>              <span class="n">linkedList</span><span class="o">.</span><span class="n">offer</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+</span><span class='line'>              <span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="nb">String</span> <span class="n">take</span><span class="p">(){</span>
+</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">synchronized</span> <span class="p">(</span><span class="n">this</span><span class="p">){</span>
+</span><span class='line'>              <span class="k">while</span><span class="p">(</span><span class="n">linkedList</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()){</span>
+</span><span class='line'>                  <span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>              <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">600</span><span class="p">);</span>
+</span><span class='line'>              <span class="nb">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+</span><span class='line'>              <span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>              <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">null</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<br>
+
+
+<blockquote><p>TaskPool表示缓冲区,该类中maxsize表示缓冲区的大小,put和take分别表示对缓冲区的操作.</p></blockquote>
+
+<figure class='code'><figcaption><span>TaskPool.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="n">void</span> <span class="n">put</span><span class="p">(</span><span class="nb">String</span> <span class="n">task</span><span class="p">){</span>
+</span><span class='line'>  <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">synchronized</span> <span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">while</span><span class="p">(</span><span class="n">maxsize</span> <span class="o">==</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">size</span><span class="p">()){</span>
+</span><span class='line'>              <span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="sr">//</span><span class="err">生产者</span><span class="n">put</span> <span class="n">task</span><span class="err">花费的时间</span>
+</span><span class='line'>          <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">linkedList</span><span class="o">.</span><span class="n">offer</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;put方法是将一个task存储在linkedList中.该操作是一个原子操作,如果缓冲区中task满了,该线程会调用wait进入睡眠并释放该对象锁,这样其他线程就可以进入有this加锁的同步代码块(主要是可以让消费者take).如果缓冲区没满,那么该生产者会put一个task,并通知其他线程(当缓冲区为空时,通知消费者可以取task了).</p>
+
+<figure class='code'><figcaption><span>TaskPool.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="nb">String</span> <span class="n">take</span><span class="p">(){</span>
+</span><span class='line'>  <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">synchronized</span> <span class="p">(</span><span class="n">this</span><span class="p">){</span>
+</span><span class='line'>          <span class="k">while</span><span class="p">(</span><span class="n">linkedList</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()){</span>
+</span><span class='line'>              <span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="sr">//</span><span class="err">消费者</span><span class="n">take</span> <span class="n">task</span><span class="err">花费的时间</span>
+</span><span class='line'>          <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">600</span><span class="p">);</span>
+</span><span class='line'>          <span class="nb">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>          <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">null</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>生产者:</p></blockquote>
+
+<figure class='code'><figcaption><span>ProductTask.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ProductTask</span> <span class="n">implements</span> <span class="no">Runnable</span><span class="p">{</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="no">TaskPool</span> <span class="n">taskPool</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">ProductTask</span><span class="p">(</span><span class="no">TaskPool</span> <span class="n">taskPool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">taskPool</span> <span class="o">=</span> <span class="n">taskPool</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span><span class='line'>          <span class="n">int</span> <span class="n">value</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">taskPool</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">value</span><span class="o">+</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="s2">&quot;product set : &quot;</span> <span class="o">+</span> <span class="n">value</span><span class="o">+</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>消费者:</p></blockquote>
+
+<figure class='code'><figcaption><span>CustomerTask.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CustomerTask</span> <span class="n">implements</span> <span class="no">Runnable</span><span class="p">{</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="no">TaskPool</span> <span class="n">taskPool</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">CustomerTask</span><span class="p">(</span><span class="no">TaskPool</span> <span class="n">taskPool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">taskPool</span> <span class="o">=</span> <span class="n">taskPool</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="s2">&quot;customer take :&quot;</span> <span class="o">+</span><span class="n">taskPool</span><span class="o">.</span><span class="n">take</span><span class="p">());</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>client: 模拟调度</p></blockquote>
+
+<figure class='code'><figcaption><span>Client.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">Client</span> <span class="p">{</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="n">throws</span> <span class="no">InterruptedException</span> <span class="p">{</span>
+</span><span class='line'>      <span class="no">TaskPool</span> <span class="n">taskPool</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">TaskPool</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+</span><span class='line'>      <span class="no">Thread</span> <span class="n">p1</span> <span class="o">=</span>  <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ProductTask</span><span class="p">(</span><span class="n">taskPool</span><span class="p">));</span>
+</span><span class='line'>      <span class="no">Thread</span> <span class="n">p2</span> <span class="o">=</span>  <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ProductTask</span><span class="p">(</span><span class="n">taskPool</span><span class="p">));</span>
+</span><span class='line'>      <span class="no">Thread</span> <span class="n">p3</span> <span class="o">=</span>  <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">ProductTask</span><span class="p">(</span><span class="n">taskPool</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">p3</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="no">Thread</span> <span class="n">c1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">CustomerTask</span><span class="p">(</span><span class="n">taskPool</span><span class="p">));</span>
+</span><span class='line'>      <span class="no">Thread</span> <span class="n">c2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="kp">new</span> <span class="no">CustomerTask</span><span class="p">(</span><span class="n">taskPool</span><span class="p">));</span>
+</span><span class='line'>      <span class="n">c1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">c2</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">p2</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">p3</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">c1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">c2</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
+</span><span class='line'>      <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="n">taskPool</span><span class="o">.</span><span class="n">getLinkedList</span><span class="p">()</span><span class="o">.</span><span class="n">size</span><span class="p">());</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面运行生产者最后会阻塞,因为当生产者把缓冲区put满时,这时已经没有消费者消费了.读者可以调整生产者,消费者生产和消费数据的个数和线程数来调整它们之间的关系.上面例子就可以解决在同步代码块中使用限制因素.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[线程同步(二)]]></title>
@@ -213,7 +531,7 @@ public void increment(){
 
 
 <p>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面是一个比较特殊的可重入,当子类中调用父类的同步方法,那么锁还可以重入吗?答案是肯定的.当进入CheckReentrancyChild.doSomething()方法时获取CheckReentrancyChild内置对象的锁(this),当执行super.doSomething()时,其实这时父类的锁对象也是子类的对象this,所以对于这种情况就是一个线程对一个对象锁的两次进入.
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面是一个比较特殊的可重入,当子类中调用父类的同步方法,那么锁还可以重入吗?答案是肯定的.当进入CheckReentrancyChild.doSomething()方法时获取CheckReentrancyChild内置对象的锁(this),当执行super.doSomething()时,其实这时父类的锁对象也就是子类的对象this,所以对于这种情况就是一个线程对一个对象锁的两次进入,也体现了锁的可重入性.由此可知,Java中锁是与线程绑定的,而并不是与方法绑定.这在使用上也提供了一种灵活性.
 </p>
 
 ]]></content>

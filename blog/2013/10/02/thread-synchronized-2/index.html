@@ -286,7 +286,7 @@ public void increment(){
 
 
 <p>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面是一个比较特殊的可重入,当子类中调用父类的同步方法,那么锁还可以重入吗?答案是肯定的.当进入CheckReentrancyChild.doSomething()方法时获取CheckReentrancyChild内置对象的锁(this),当执行super.doSomething()时,其实这时父类的锁对象也是子类的对象this,所以对于这种情况就是一个线程对一个对象锁的两次进入.
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面是一个比较特殊的可重入,当子类中调用父类的同步方法,那么锁还可以重入吗?答案是肯定的.当进入CheckReentrancyChild.doSomething()方法时获取CheckReentrancyChild内置对象的锁(this),当执行super.doSomething()时,其实这时父类的锁对象也就是子类的对象this,所以对于这种情况就是一个线程对一个对象锁的两次进入,也体现了锁的可重入性.由此可知,Java中锁是与线程绑定的,而并不是与方法绑定.这在使用上也提供了一种灵活性.
 </p>
 
 </div>
@@ -343,6 +343,8 @@ public void increment(){
         <a class="basic-alignment left" href="/blog/2013/10/01/thread-synchronized-1/" title="Previous Post: 线程同步(一)">&laquo; 线程同步(一)</a>
       
       
+        <a class="basic-alignment right" href="/blog/2013/10/09/thread-synchronized-3/" title="Next Post: 线程同步(三)">线程同步(三) &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -354,6 +356,10 @@ public void increment(){
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/02/thread-synchronized-2/">线程同步(二)</a>
@@ -369,10 +375,6 @@ public void increment(){
     
       <li class="post">
         <a href="/blog/2013/07/15/javachang-yong-zhi-shi-dian/">Java常用知识点</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/05/16/sql-command/">SQL Command</a>
       </li>
     
   </ul>
