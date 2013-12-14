@@ -110,6 +110,23 @@
 第一层 物理层
     主要定义物理设备的标准。网卡、中继器、集线器
 </code></pre>
+
+<br/>
+
+
+<!--more-->
+
+
+<blockquote><p>根据子网掩码求最大主机数和子网数?<br></p></blockquote>
+
+<pre><code>子网掩码:子网掩码是一个32位的二进制数,其对应的网络地址都为1,对应的主机地址的所有位置都为0.
+
+所选择的子网将产生多少个子网?
+    2^x-2(x代表网络位借用的主机数.即二进制为1的).
+
+每个子网能产生多少主机?
+    2^y-2(y代表主机数,即二进制为0部分).     
+</code></pre>
 </div>
 
 
@@ -179,6 +196,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/20/thread-sysnchroized-4/">线程同步(四)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a>
       </li>
     
@@ -191,11 +212,7 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/01/heapsort/">Heapsort</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/15/javachang-yong-zhi-shi-dian/">Java常用知识点</a>
+        <a href="/blog/2013/10/01/heapsort/">堆排序</a>
       </li>
     
   </ul>

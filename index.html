@@ -9,7 +9,7 @@
   <meta name="author" content="Lumint">
 
   
-  <meta name="description" content="同步条件的使用: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上篇提到互斥量(锁)的使用(线程同步(二)),使用锁能使线程间同步访问数据,由于实际情况有诸多限制条件和因素,所以JVM也提供wait(),notify(),notifyAll()方法, &hellip;">
+  <meta name="description" content="Volatile变量的同步机制 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于线程的同步一般使用synchronized关键字来锁定对共享资源的使用,同时Java提供也一种弱同步机制——volatile变量来实现共享资源的使用。 public volatile int &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/20/thread-sysnchroized-4/">线程同步(四)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-20T21:10:00+08:00" pubdate data-updated="true">Nov 20<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Volatile变量的同步机制</h3>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于线程的同步一般使用synchronized关键字来锁定对共享资源的使用,同时Java提供也一种弱同步机制——volatile变量来实现共享资源的使用。</p>
+
+<pre><code>public volatile int i = 1;
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当变量声明为volatile类型后,编译和运行时都会将该变量标记为多个线程(多处理器)共享变量,Java线程内存模型保证该变量内存的可见性(当一个线程修改后所有线程都能读到修改后的值).对于synchroized来说volatile更轻量级,synchroized代码块访问时会引起线程调用、线程上下文切换等，而volatile将不会出现这些,使用和执行的开销更小.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但volatile变量只能保证修改以后所有线程的可见性是一致的.例如：</p>
+
+<pre><code>    i = 3;
+</code></pre>
+
+<p>当上面代码执行以后所有线程读取结果都一样即3.但是如果对volatile操作不是原子操作那么读取结果将会不一致。如：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/20/thread-sysnchroized-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -315,7 +370,7 @@ public synchronized void increment(){
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/10/01/heapsort/">Heapsort</a></h1>
+      <h1 class="entry-title"><a href="/blog/2013/10/01/heapsort/">堆排序</a></h1>
     
     
       <p class="meta">
@@ -338,7 +393,13 @@ public synchronized void increment(){
   </header>
 
 
-  <div class="entry-content"><p>Hello Heapsort</p>
+  <div class="entry-content"><blockquote><p>理解堆：</p></blockquote>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于计算机学科的来说，堆一定不陌生。其实堆分两种：一种是程序中的堆，对于面向对象程序当程序运行创建对象时，这时给对象分配的内存空间就是在堆中开辟一块空间。在<a href="blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a>图一中的heap。它存放着程序运行过程中动态分配和创建的一些数据。另外一种是数据结构中的堆，它是一种数据结构，通常被看做一个树的数组。堆一般也指二叉堆，实际为二叉树的一种。</p>
+
+<blockquote><p>堆排序：</p></blockquote>
+
+<p>在程序中经常用数组来代替堆中的数据。</p>
 </div>
   
   
@@ -618,44 +679,16 @@ public static void swap(int[] data, int j, int i) {
 第一层 物理层
     主要定义物理设备的标准。网卡、中继器、集线器
 </code></pre>
+
+<br/>
+
+
 </div>
   
   
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/18/object-oriented/">Object-Oriented</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-18T11:20:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">
-</div>
-  
+    <footer>
+      <a rel="full-article" href="/blog/2013/04/19/open-system-interconnection-reference-model/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -676,6 +709,10 @@ public static void swap(int[] data, int j, int i) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/20/thread-sysnchroized-4/">线程同步(四)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a>
       </li>
     
@@ -688,11 +725,7 @@ public static void swap(int[] data, int j, int i) {
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/01/heapsort/">Heapsort</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/15/javachang-yong-zhi-shi-dian/">Java常用知识点</a>
+        <a href="/blog/2013/10/01/heapsort/">堆排序</a>
       </li>
     
   </ul>

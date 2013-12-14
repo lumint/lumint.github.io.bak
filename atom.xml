@@ -4,7 +4,7 @@
   <title><![CDATA[Lumint's Octopress Blog]]></title>
   <link href="http://lumint.github.io/atom.xml" rel="self"/>
   <link href="http://lumint.github.io/"/>
-  <updated>2013-10-11T17:20:22+08:00</updated>
+  <updated>2013-12-14T21:48:18+08:00</updated>
   <id>http://lumint.github.io/</id>
   <author>
     <name><![CDATA[Lumint]]></name>
@@ -12,6 +12,258 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[线程同步(四)]]></title>
+    <link href="http://lumint.github.io/blog/2013/11/20/thread-sysnchroized-4/"/>
+    <updated>2013-11-20T21:10:00+08:00</updated>
+    <id>http://lumint.github.io/blog/2013/11/20/thread-sysnchroized-4</id>
+    <content type="html"><![CDATA[<h3>Volatile变量的同步机制</h3>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于线程的同步一般使用synchronized关键字来锁定对共享资源的使用,同时Java提供也一种弱同步机制——volatile变量来实现共享资源的使用。</p>
+
+<pre><code>public volatile int i = 1;
+</code></pre>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当变量声明为volatile类型后,编译和运行时都会将该变量标记为多个线程(多处理器)共享变量,Java线程内存模型保证该变量内存的可见性(当一个线程修改后所有线程都能读到修改后的值).对于synchroized来说volatile更轻量级,synchroized代码块访问时会引起线程调用、线程上下文切换等，而volatile将不会出现这些,使用和执行的开销更小.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但volatile变量只能保证修改以后所有线程的可见性是一致的.例如：</p>
+
+<pre><code>    i = 3;
+</code></pre>
+
+<p>当上面代码执行以后所有线程读取结果都一样即3.但是如果对volatile操作不是原子操作那么读取结果将会不一致。如：</p>
+
+<!--more-->
+
+
+<pre><code>    i++;
+</code></pre>
+
+<p>因为i++是先读取i在+1然后在写入i,这样volatile变量读取出来的值可能不一致。但是对于下面代码</p>
+
+<figure class='code'><figcaption><span>TaskPool.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">private</span> <span class="n">volatile</span> <span class="n">double</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">public</span> <span class="n">void</span> <span class="n">setDouble</span><span class="p">(</span><span class="n">double</span> <span class="n">d</span><span class="p">){</span>
+</span><span class='line'>  <span class="n">this</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">public</span> <span class="n">double</span> <span class="n">getDouble</span><span class="p">(){</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">this</span><span class="o">.</span><span class="n">d</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在不同的机器上上面的被多线程访问变量d可能会出现多种结果。volatile类型的变量保证了内存的可见性为什么会有多种结果呢？因为double和long都是8字节(64bit)，由于JVM的实现不同(各个生产商的实现不同)和不同的机器环境(32/64bit机器)可能double和long型数据高位和低位是要分二次来取(写)从而导致对double和long型操作不是原子的,从而导致数据volatile变量读写不一致(可以使用jdk1.5以后的java.util.concurrent.atomic下面的原子操作类型)。由于加锁机制能保证原子操作而volatile变量不能。所以一般对于下面情况才使用volatile变量：</p>
+
+<pre><code>1.对该变量的操作不依赖与以前的值。
+2.在访问该变量不需要加锁。
+3.多线程操作时，确保只有一个线程更新值。 
+</code></pre>
+
+<br>
+
+
+<h3>Lock的同步机制</h3>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在JDK1.5以前使用多线程共享内存和同步访问的机制只有通过synchronized和volatile来实现。JDK1.5中增加了一种新的机制Lock，Lock并不是替代synchronized和volatile，而是当synchroized和volatile不太适用时而更灵活的一种方式。<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于synchroized是对于块结构的加锁机制，即加锁是进入一个块进行加锁退出该块解锁（进入同步块JVM中就进行monitorenter和monitorexit操作同时对锁的计数器加或减1），但是对于非结构的锁定synchroized就有点心有余而力不足了，同时synchroized也存在一些功能性问题，比如：对于死锁情况synchroized就无法解除(不能中断锁)、也无法通过投票等到锁、用户不能自己设定调度算法和一些锁的定义。Lock的使用很简单，如下：</p>
+
+<!--more-->
+
+
+<p></p>
+
+<figure class='code'><figcaption><span>LockTest.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Lock</span> <span class="n">l</span> <span class="o">=</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">;</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">lock</span><span class="p">();</span>
+</span><span class='line'><span class="sr">//</span><span class="n">access</span> <span class="n">the</span> <span class="n">resource</span> <span class="kp">protected</span> <span class="n">by</span> <span class="n">this</span> <span class="n">lock</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">unlock</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在要同步的代码块前后分别使用lock和unlock即可。但是下面代码，当locking和unlocking发生在不同的范围中,必须要保证unlock在代码块中的释放(比如catch和finally块)。</p>
+
+<figure class='code'><figcaption><span>LockTest.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Lock</span> <span class="n">l</span> <span class="o">=</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">;</span>
+</span><span class='line'><span class="n">l</span><span class="o">.</span><span class="n">lock</span><span class="p">();</span>
+</span><span class='line'><span class="n">try</span><span class="p">{</span>
+</span><span class='line'>  <span class="sr">//</span><span class="n">access</span> <span class="n">the</span> <span class="n">resource</span> <span class="kp">protected</span> <span class="n">by</span> <span class="n">this</span> <span class="n">lock</span>
+</span><span class='line'><span class="p">}</span><span class="n">finally</span><span class="p">{</span>
+</span><span class='line'>  <span class="n">l</span><span class="o">.</span><span class="n">unlock</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lock实现了使用synchronized关键字的所有功能和一些synchronized没有的其他功能，提供了一个尝试获取Lock(tryLock()),获取超时的失效Lock(tryLock(long t,TimeUnit tu)),获取可interrupt lock(lockInterruptibly())。Lock的实现都保证了和synchronized相同的内存同步语义。<br/></p>
+
+<h5>ReentrantLock:</h5>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ReentrantLock可重入互斥锁使用了和synchronized关键字的语句块和方法相同的行为和语义并扩展其能力。ReentrantLock是Lock的一种具体实现也是使用情况最多的一种。</p>
+
+<figure class='code'><figcaption><span>RTLockTest.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">RTLockTest</span><span class="p">{</span>  
+</span><span class='line'>  <span class="kp">private</span> <span class="n">final</span> <span class="no">Lock</span> <span class="n">rtLck</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">ReentrantLock</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="nb">method</span><span class="p">(){</span>
+</span><span class='line'>      <span class="n">rtlck</span><span class="o">.</span><span class="n">lock</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">try</span><span class="p">{</span>
+</span><span class='line'>          <span class="sr">//me</span><span class="n">thod</span> <span class="n">code</span><span class="o">.</span>
+</span><span class='line'>      <span class="p">}</span><span class="n">finally</span><span class="p">{</span>
+</span><span class='line'>          <span class="n">rtlck</span><span class="o">.</span><span class="n">unlock</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于ReentrantLock是可重入的，因此一个线程可以多次进入lock块，每次进入lock块相应的计数值+1，退出lock块计数值-1,最多可重入Integer.MAX_VALUE次。同样ReentrantReadWriteLock.ReadLock, ReentrantReadWriteLock.WriteLock也实现了Lock接口，分别是一个读锁一个写锁(可以同时加多个读锁，写锁一次只能加一次，读锁和写锁不能同时加)。在Lock包中还有一个Condition接口，用户可以自定义Condition也可以使用ReentrantLock提供的Condition.改写<a href="http://lumint.github.io/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a>缓冲池如下：</p>
+
+<figure class='code'><figcaption><span>TaskPool4Condition.java</span><a href='http://www.google.com.hk'>Google</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TaskPool4Condition</span><span class="p">{</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">int</span> <span class="n">maxsize</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="no">LinkedList</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span> <span class="n">linkedList</span><span class="p">;</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">final</span> <span class="no">Lock</span> <span class="n">lock</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">ReentrantLock</span><span class="p">();</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">final</span> <span class="no">Condition</span> <span class="n">notFull</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">newCondition</span><span class="p">();</span>
+</span><span class='line'>  <span class="kp">private</span> <span class="n">final</span> <span class="no">Condition</span> <span class="n">notEmpty</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">newConditon</span><span class="p">();</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">TaskPool</span><span class="p">(</span><span class="n">int</span> <span class="n">maxsize</span><span class="p">){</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">=</span> <span class="n">maxsize</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">this</span><span class="o">.</span><span class="n">linkedList</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">LinkedList</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="no">List</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span> <span class="n">getLinkedList</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="no">Collections</span><span class="o">.</span><span class="n">unmodifiableList</span><span class="p">(</span><span class="n">linkedList</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">put</span><span class="p">(</span><span class="nb">String</span> <span class="n">task</span><span class="p">){</span>
+</span><span class='line'>      <span class="n">lock</span><span class="o">.</span><span class="n">lock</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">while</span><span class="p">(</span><span class="n">maxsize</span> <span class="o">==</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">size</span><span class="p">()){</span>
+</span><span class='line'>              <span class="sr">//</span><span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>              <span class="n">notFull</span><span class="o">.</span><span class="n">await</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">linkedList</span><span class="o">.</span><span class="n">offer</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+</span><span class='line'>          <span class="sr">//</span><span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">notEmpty</span><span class="o">.</span><span class="n">signal</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span><span class="n">finally</span><span class="p">{</span>
+</span><span class='line'>          <span class="n">lock</span><span class="o">.</span><span class="n">unlock</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kp">public</span> <span class="nb">String</span> <span class="n">take</span><span class="p">(){</span>
+</span><span class='line'>      <span class="n">lock</span><span class="o">.</span><span class="n">lock</span><span class="p">();</span>    
+</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">while</span><span class="p">(</span><span class="n">linkedList</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()){</span>
+</span><span class='line'>              <span class="sr">//</span><span class="n">this</span><span class="o">.</span><span class="n">wait</span><span class="p">();</span>
+</span><span class='line'>              <span class="n">notEmpty</span><span class="o">.</span><span class="n">await</span><span class="p">();</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>          <span class="no">Thread</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="kp">new</span> <span class="no">Random</span><span class="p">()</span><span class="o">.</span><span class="n">nextInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="mi">600</span><span class="p">);</span>
+</span><span class='line'>          <span class="nb">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">linkedList</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+</span><span class='line'>          <span class="sr">//</span><span class="n">this</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">();</span>
+</span><span class='line'>          <span class="n">notFull</span><span class="o">.</span><span class="n">signal</span><span class="p">();</span>
+</span><span class='line'>          <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span><span class="n">finally</span><span class="p">{</span>
+</span><span class='line'>          <span class="n">lock</span><span class="o">.</span><span class="n">unlock</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">null</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;同样使用ReentrantReadWriteLock也可以同步数据访问，开可以构建(非)公平锁（通过修改Lock的公平性）。还有java.util.concurrent包及其子包提供了一些列同步的工具类和原子操作类等。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[线程同步(三)]]></title>
@@ -721,11 +973,17 @@ public void increment(){
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Heapsort]]></title>
+    <title type="html"><![CDATA[堆排序]]></title>
     <link href="http://lumint.github.io/blog/2013/10/01/heapsort/"/>
     <updated>2013-10-01T00:57:00+08:00</updated>
     <id>http://lumint.github.io/blog/2013/10/01/heapsort</id>
-    <content type="html"><![CDATA[<p>Hello Heapsort</p>
+    <content type="html"><![CDATA[<blockquote><p>理解堆：</p></blockquote>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于计算机学科的来说，堆一定不陌生。其实堆分两种：一种是程序中的堆，对于面向对象程序当程序运行创建对象时，这时给对象分配的内存空间就是在堆中开辟一块空间。在<a href="blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a>图一中的heap。它存放着程序运行过程中动态分配和创建的一些数据。另外一种是数据结构中的堆，它是一种数据结构，通常被看做一个树的数组。堆一般也指二叉堆，实际为二叉树的一种。</p>
+
+<blockquote><p>堆排序：</p></blockquote>
+
+<p>在程序中经常用数组来代替堆中的数据。</p>
 ]]></content>
   </entry>
   
@@ -869,6 +1127,23 @@ public static void swap(int[] data, int j, int i) {
     定义如何让格式化的数据进行传输，以及如何让控制对物理介质的的访问。还提供错误检测和纠正，以确保数据的可靠传输。Bridge桥接器 Switch交换器 
 第一层 物理层
     主要定义物理设备的标准。网卡、中继器、集线器
+</code></pre>
+
+<br/>
+
+
+<!--more-->
+
+
+<blockquote><p>根据子网掩码求最大主机数和子网数?<br></p></blockquote>
+
+<pre><code>子网掩码:子网掩码是一个32位的二进制数,其对应的网络地址都为1,对应的主机地址的所有位置都为0.
+
+所选择的子网将产生多少个子网?
+    2^x-2(x代表网络位借用的主机数.即二进制为1的).
+
+每个子网能产生多少主机?
+    2^y-2(y代表主机数,即二进制为0部分).     
 </code></pre>
 ]]></content>
   </entry>
