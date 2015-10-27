@@ -6,10 +6,11 @@
 <head>
   <meta charset="utf-8">
   <title>Lumint's Octopress Blog</title>
-  <meta name="author" content="Lumint">
+  <meta name="author" content="lumint">
 
   
-  <meta name="description" content="Volatile变量的同步机制 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于线程的同步一般使用synchronized关键字来锁定对共享资源的使用,同时Java提供也一种弱同步机制——volatile变量来实现共享资源的使用。 public volatile int &hellip;">
+  <meta name="description" content="
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,17 +19,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://lumint.github.io">
+  <link rel="canonical" href="http://lumint.github.io/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Lumint's Octopress Blog" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
 
@@ -43,14 +44,16 @@
 </hgroup>
 
 </header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <nav role="navigation"><ul class="subscription" data-subscription="rss email">
   <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+    <li><a href="smilemint8895@gmail.com" rel="subscribe-email" title="subscribe via email">Email</a></li>
   
 </ul>
   
-<form action="http://google.com/search" method="get">
+<form action="https://www.google.com/search" method="get">
   <fieldset role="search">
-    <input type="hidden" name="q" value="site:lumint.github.io" />
+    <input type="hidden" name="sitesearch" value="lumint.github.io">
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
@@ -71,7 +74,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/11/20/thread-sysnchroized-4/">线程同步(四)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/10/27/zookeeper/">Zookeeper</a></h1>
     
     
       <p class="meta">
@@ -80,623 +83,25 @@
 
 
 
-
-
-
-
-  
-
-
-<time datetime="2013-11-20T21:10:00+08:00" pubdate data-updated="true">Nov 20<span>th</span>, 2013</time>
+<time class='entry-date' datetime='2015-10-27T14:33:39+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:33 pm</span></time>
+        
+           | <a href="/blog/2015/10/27/zookeeper/#disqus_thread"
+             data-disqus-identifier="http://lumint.github.io/blog/2015/10/27/zookeeper/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Volatile变量的同步机制</h3>
-
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于线程的同步一般使用synchronized关键字来锁定对共享资源的使用,同时Java提供也一种弱同步机制——volatile变量来实现共享资源的使用。</p>
-
-<pre><code>public volatile int i = 1;
-</code></pre>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当变量声明为volatile类型后,编译和运行时都会将该变量标记为多个线程(多处理器)共享变量,Java线程内存模型保证该变量内存的可见性(当一个线程修改后所有线程都能读到修改后的值).对于synchroized来说volatile更轻量级,synchroized代码块访问时会引起线程调用、线程上下文切换等，而volatile将不会出现这些,使用和执行的开销更小.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但volatile变量只能保证修改以后所有线程的可见性是一致的.例如：</p>
-
-<pre><code>    i = 3;
-</code></pre>
-
-<p>当上面代码执行以后所有线程读取结果都一样即3.但是如果对volatile操作不是原子操作那么读取结果将会不一致。如：</p>
-
+  <div class="entry-content">
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/11/20/thread-sysnchroized-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-09T18:10:00+08:00" pubdate data-updated="true">Oct 9<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>同步条件的使用:</h3>
-
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上篇提到互斥量(锁)的使用(<a href="/blog/2013/10/02/thread-synchronized-2/">线程同步(二)</a>),使用锁能使线程间同步访问数据,由于实际情况有诸多限制条件和因素,所以JVM也提供wait(),notify(),notifyAll()方法,可以在同步代码块中使用条件.因为任何对象都可以作为锁,所以这三种方法是在Object对象中的,任何类都继承了此方法.<br/></p>
-
-<pre><code>wait():一个线程调用wait方法JVM会让该线程睡眠并释放该对象锁,因此 wait方法必须在synchronized代码块中调用,否则
-      会抛出IllegalMonitorStateException.
-
-notify(),notifyAll():都是唤醒某个对象锁上面的线程,而notify是唤醒该对象锁的第一个等待线程,notifyAll是所有等
-      待线程.因此二者也必须在同步代码块中使用.   
-</code></pre>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;生产者和消费者是在并发编程中一个经典的问题,一个缓冲区,多个生产者,多个消费者从而构成了并发中同步,共享数据等问题.</p>
-
-<pre><code>需求:多个生产者向缓冲区中存储数据,多个消费者向缓冲区中取数据,当缓冲区满了生产者不能存储数据,当缓冲区
-    为空消费者不能取数据.
-
-设计:该需求设计三个数据模型生产者,消费者,缓冲区.
-</code></pre>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/10/09/thread-synchronized-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/02/thread-synchronized-2/">线程同步(二)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-02T22:00:00+08:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>互斥量:</h3>
-
-
-<p>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在Java中互斥量必须为对象类型,不能是基本数据类型,在Java中互斥量应该被称为锁.在一个应用中什么时候使用锁呢? 该如何使用锁呢?<br/>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;先看下面这个计数例子:
-
-<figure class='code'><figcaption><span>Counter.java</span><a href='http://weibo.com/u/2277842353'>Weibo</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">public</span> <span class="k">class</span> <span class="nc">Counter</span> <span class="n">implements</span> <span class="no">Runnable</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kp">private</span> <span class="n">int</span> <span class="n">count</span><span class="p">;</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">increment</span><span class="p">(){</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="nb">Integer</span><span class="o">.</span><span class="n">MAX_VALUE</span><span class="p">)</span>
-</span><span class='line'>          <span class="kp">throw</span> <span class="kp">new</span> <span class="no">IllegalStateException</span><span class="p">(</span><span class="s2">&quot;count overflow!&quot;</span><span class="p">);</span>
-</span><span class='line'>      <span class="n">count</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="kp">public</span> <span class="n">int</span> <span class="n">getCount</span><span class="p">(){</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="vi">@Override</span>
-</span><span class='line'>  <span class="kp">public</span> <span class="n">void</span> <span class="n">run</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">for</span><span class="p">(</span><span class="n">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">increment</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">public</span> <span class="n">static</span> <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="nb">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="n">try</span> <span class="p">{</span>
-</span><span class='line'>          <span class="no">Counter</span> <span class="n">task</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Counter</span><span class="p">();</span>
-</span><span class='line'>          <span class="no">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
-</span><span class='line'>          <span class="no">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Thread</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
-</span><span class='line'>          <span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>          <span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
-</span><span class='line'>          <span class="n">t1</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
-</span><span class='line'>          <span class="n">t2</span><span class="o">.</span><span class="n">join</span><span class="p">();</span>
-</span><span class='line'>          <span class="no">System</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">println</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">getCount</span><span class="p">());</span>
-</span><span class='line'>      <span class="p">}</span> <span class="kp">catch</span> <span class="p">(</span><span class="no">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="n">e</span><span class="o">.</span><span class="n">printStackTrace</span><span class="p">();</span>
-</span><span class='line'>      <span class="p">}</span>            
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上面程序因为没有使用同步机制,所以运行结果一般会小于20000,这是因为在increment方法中count++并不是原子操作,count++分成 读&#8211;>修改&#8211;>写 三步组成,所以在多线程的访问下,该操作不是线程安全的.因此我们必须采用同步机制来使count++为原子操作.<br/>
-        
-</p>
-
-
-<pre><code>①让方法为原子操作: 在increment方法前加入synchronized.
-public synchronized void increment(){
-    count++;
-}
-</code></pre>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/10/02/thread-synchronized-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-01T15:54:00+08:00" pubdate data-updated="true">Oct 1<span>st</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>介绍</h3>
-
-
-<h6>
-        1.1线程是什么?要弄清楚线程是什么,首先需要知道另一个名词进程,那什么是进程呢?<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        
-        简单的来讲,进程就是一次程序(指的是源代码通过编译,汇编,连接等变成的可执行文件)的执行.它是一个动态的过程,而程序却是一个静态的概念.&nbsp;比如:一个聊天软件QQ放在桌面你没有去点击时,这时就是一个存放在硬盘的程序,通过你的点击开始加载到内存开始执行到最终退出,这个中间过程就是程序的一次执行,就是所谓的进程.(还有文本编辑器,Web Browser等).居然进程是程序的一次执行,那么进程和程序有什么区别呢?<br/><br/>
-
-        1.2进程和程序的区别?<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    
-        进程虽然来至于程序,但是它和程序有很大的不同.最主要的前者是动态的而后者却是静态的.进程不仅仅包含text section(程序代码区),还必须有指向运行时的程序计数器,还包含程序运行stack(存放一些函数参数,返回地址,局部变量等),还有数据区存放一些全局变量,还有Heap(堆区)存放程序运行过程中动态分配和创建的一些数据.如图:<br/>
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/images/thread/2013-10-01.png"><br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-             图1:程序内存分配图<br/><br/>
-    
-</h6>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/10/01/thread-synchronized-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/01/heapsort/">堆排序</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-01T00:57:00+08:00" pubdate data-updated="true">Oct 1<span>st</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><blockquote><p>理解堆：</p></blockquote>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;对于计算机学科的来说，堆一定不陌生。其实堆分两种：一种是程序中的堆，对于面向对象程序当程序运行创建对象时，这时给对象分配的内存空间就是在堆中开辟一块空间。在<a href="blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a>图一中的heap。它存放着程序运行过程中动态分配和创建的一些数据。另外一种是数据结构中的堆，它是一种数据结构，通常被看做一个树的数组。堆一般也指二叉堆，实际为二叉树的一种。</p>
-
-<blockquote><p>堆排序：</p></blockquote>
-
-<p>在程序中经常用数组来代替堆中的数据。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/07/15/javachang-yong-zhi-shi-dian/">Java常用知识点</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-07-15T18:19:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><pre><code>基本知识点:
-    1.变量的种类：全局变量(static类对象) 成员变量(对象的变量) 局部变量(方法中的变量) 
-    2.Java中的两种数据类型：值类型，引用类型   
-        public static void main(String[] args){
-            int a = 0;
-            Student stu = new Student();
-            stu.setValue(0);
-            test(a,stu);//把main中a的值(0)赋值给test方法的形参a(test方法的栈空间),把main中stu的地址赋值给test方法形参stu所在空间。
-            System.out.printf("a =" + a + "; stu.getValue=" + stu.getValue());
-        }
-
-        public static void test(int a,Student stu){
-            a = 10;
-            stu.setValue(10);
-        }
-        &gt;运行结果：a =0; stu.getValue=10;
-        &gt;值类型和引用类型的区别 值类型是直接赋值(是一份拷贝),引用类型是指向的同一地址   
-    3.
-    4.
-    5.
-    6.
-    7.
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/16/sql-command/">SQL Command</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-16T11:17:00+08:00" pubdate data-updated="true">May 16<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>SQL Command:</p>
-
-<pre><code>修改以存在数据库的编码:ALTER DATABASE database_name DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
-修改以存在表的编码:ALTER TABLE table_name DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/13/algorithms/">Algorithms</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-13T13:16:00+08:00" pubdate data-updated="true">May 13<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Sorted Algorithms:</p>
-
-<pre><code>Bubble Sort:
-
-/** 
- * bubble sort  
- * 0(n^2)
- * @param data
- */
-public static void bubbleSort(int[] data){
-    for(int i = 0;i &lt; data.length ;i++){
-        for(int j = 0;j &lt; data.length-i-1;j++){
-            if(data[j] &gt; data[j+1])swap(data,j,j+1); 
-        }
-    }
-}
-
-/**
- * The worst time  0(n^2)
- * The average time 0(nlg(n))
- * @param data
- * @param start
- * @param end
- */
-public static void quickSort(int[] data,int start,int end){
-    if(start &gt; end) return;
-    int povit = data[start];
-    int j = start;
-    for(int i=start ;i &lt;= end ; i++){
-        if(data[i] &lt; povit ) swap(data,i,++j);
-    }
-    swap(data,j,start);
-    quickSort(data,start,j-1);
-    quickSort(data, j+1, end);
-}
-
-public static void swap(int[] data, int j, int i) {
-    int temp = data[i];
-    data[i] = data[j];
-    data[j] = temp;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/19/discrete-mathematics/">Discrete Mathematics</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-19T17:19:00+08:00" pubdate data-updated="true">Apr 19<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>拓扑排序:</p>
-
-<pre><code>对一个有向无环图(Directed Acyclic Graph简称DAG)G进行拓扑排序，是将G中所有顶点排成一个线性序列，使得图中任意一对顶点u和v，若 ∈E(G)，则u在线性序列中出现在v之前。
-</code></pre>
-
-<p>拓扑排序应用:</p>
-
-<pre><code>拓扑排序常用来确定一个依赖关系集中，事物发生的顺序。例如，在日常工作中，可能会将项目拆分成A、B、C、D四个子部分来完成，但A依赖于B和D，C依赖于D。为了计算这个项目进行的顺序，可对这个关系集进行拓扑排序，得出一个线性的序列，则排在前面的任务就是需要先完成的任务。
-</code></pre>
-
-<p>拓扑排序方法:</p>
-
-<pre><code>(1)从有向图中选择一个没有前驱(即入度为0)的顶点并且输出它.
-(2)从网中删去该顶点,并且删去从该顶点发出的全部有向边.
-(3)重复上述两步,直到剩余的网中不再存在没有前趋的顶点为止.
-                            &lt;from baike.baidu.com&gt;
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/19/open-system-interconnection-reference-model/">Open System Interconnection Reference Model</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-19T16:39:00+08:00" pubdate data-updated="true">Apr 19<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>OSI/RM:</p>
-
-<pre><code>第七层 应用层
-    与应用程序界面沟通,达到展示给用户的目的。常见的协议有：HTTP，HTTPS，FTP。TELNET，SSH，SMTP，POP3等。
-第六层 表示层
-    为不同的客户端提供数据和信息的语法转换内码，使系统能解读正确的数据
-第五层 会话层
-    用于为通信双方制定通信方式,并创建、注销会话
-第四层 传输层
-    用于控制数据流量，并且进行调试错误的处理，确保通信顺利. TCP、UDP
-第三层 网络层
-    决定如何将发送方的数据传送到接受方，将网络地址翻译成物理地址。考虑网络拥塞程度，服务质量，发送优先权等来选择路线。路由器、IP、ICMP、ARP、RARP
-第二层 数据链路层 
-    定义如何让格式化的数据进行传输，以及如何让控制对物理介质的的访问。还提供错误检测和纠正，以确保数据的可靠传输。Bridge桥接器 Switch交换器 
-第一层 物理层
-    主要定义物理设备的标准。网卡、中继器、集线器
-</code></pre>
-
-<br/>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/04/19/open-system-interconnection-reference-model/">Read on &rarr;</a>
-    </footer>
   
 
 
     </article>
   
   <div class="pagination">
-    
-      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -709,50 +114,13 @@ public static void swap(int[] data, int j, int i) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/11/20/thread-sysnchroized-4/">线程同步(四)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/09/thread-synchronized-3/">线程同步(三)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/02/thread-synchronized-2/">线程同步(二)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/01/thread-synchronized-1/">线程同步(一)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/10/01/heapsort/">堆排序</a>
+        <a href="/blog/2015/10/27/zookeeper/">Zookeeper</a>
       </li>
     
   </ul>
 </section>
-<section>
-    <h1>新浪微博</h1>
-    <ul id="weibo">
-    <li>
-    <!-- 在此插入获得的微博秀代码 -->
-		<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=2277842353&verifier=03cd9a29&dpc=1"></iframe>
-      </li>
-    </ul>
-</section>
 
 
-
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/smilemint8895@gmail.com?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
 
 
 
@@ -762,12 +130,25 @@ public static void swap(int[] data, int j, int i) {
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - Lumint -
+  Copyright &copy; 2015 - lumint -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
 </footer>
   
+
+<script type="text/javascript">
+      var disqus_shortname = 'lumint';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 
@@ -797,7 +178,7 @@ public static void swap(int[] data, int j, int i) {
       var twitterWidgets = document.createElement('script');
       twitterWidgets.type = 'text/javascript';
       twitterWidgets.async = true;
-      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
       document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
     })();
   </script>
